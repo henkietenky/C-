@@ -1,28 +1,65 @@
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+#include <iostream>
+#include <Eigen/Dense>
+using namespace std;
+using namespace Eigen;
 
-# Precompiled Headers
-*.gch
-*.pch
+void InputOutput(){
+	MatrixXf ProdA(5, 5);;
+	VectorXf Intd(5);
+	VectorXf Finald(5);
+	ProdA <<				//into:(row into col)  Agriculture	Manufacture	Transport Electricity Petro products
+		10, 20, 0, 0, 5,		// Agriculture		Numbers represent how much is needed to produce what		
+		20, 30, 20, 10, 10,		// Manufacture
+		10, 10, 0, 10, 10,		// Transport
+		10, 40, 20, 5, 5,		// Electricity
+		20, 20, 30, 5, 5;		// Petro products
+	
+	Intd << 55, 40, 20, 30, 10;		//demand from final consumer
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+	Finald << 0, 0, 0, 0, 0;		//demand final consumer + internal industries
+	
+	VectorXf ones(5);
+	ones << 1, 1, 1, 1, 1;
 
-# Fortran module files
-*.mod
+	Finald = ProdA * ones + Intd;
+		
+	MatrixXf AMatrix = MatrixXf::Zero(ProdA.rows(), ProdA.cols());
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+	AMatrix = ProdA.array() / (Finald.replicate(1, ProdA.cols())).array();
+	cout << "Here is the Coefficient vector production needed:\n" << AMatrix << endl;
+	
+	MatrixXf IminA(5, 5);;
 
-# Executables
-*.exe
-*.out
-*.app
+	IminA = (MatrixXf::Identity(AMatrix.rows(), AMatrix.cols()) - AMatrix);;
+	
+	cout << "Here is the I-A inverse:\n" << IminA << endl;
+	cout << "Here is the matrix of production:\n" << ProdA << endl;
+	cout << "Here is the vector Internal demand:\n" << Intd << endl;
+	cout << "Here is the vector Final demand:\n" << Finald << endl;
+	cout << "Here is the Coefficient vector production needed:\n" << AMatrix << endl;
+
+	MatrixXf IminAinv(5, 5);;
+	IminAinv = IminA.inverse();
+
+	cout << "The inverse of CoMatrix - Imatrix is:\n" << IminAinv << endl;
+
+	cout << "To check, final demand is:\n" << (IminAinv * Intd) << endl;
+
+	ones << 1, 1, 1, 1, 1;
+	Intd << 65, 40, 20, 30, 10;
+	Finald << 0, 0, 0, 0, 0;
+
+	cout << "New Internal demand is:\n" << Intd << endl;
+
+	cout << "New Final demand Matrix is:\n" << (Finald = IminAinv * Intd) << endl;
+}
+
+int main(){
+
+	char CH = 'q';
+	InputOutput();
+
+	cin.get(CH);
+	return 0;
+}
+
